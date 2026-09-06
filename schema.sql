@@ -29,6 +29,12 @@ create table if not exists public.snippets (
 
 create index if not exists snippets_order_idx on public.snippets (sort_order, created_at);
 
+-- กันข้อมูลซ้ำเวลารัน schema.sql ซ้ำอีกรอบ ถ้าไม่มี index นี้ ข้อมูลตั้งต้นจะถูกเพิ่มเข้าไปใหม่ทุกครั้ง
+-- ถ้าตารางมีข้อมูลซ้ำอยู่แล้วบรรทัดนี้จะ error ให้ลบตัวซ้ำออกก่อนด้วยคำสั่งนี้
+--   delete from public.snippets a using public.snippets b
+--   where a.ctid < b.ctid and a.category = b.category and a.title = b.title;
+create unique index if not exists snippets_cat_title_uk on public.snippets (category, title);
+
 create or replace function public.touch_updated_at()
 returns trigger language plpgsql as $$
 begin new.updated_at = now(); return new; end $$;
